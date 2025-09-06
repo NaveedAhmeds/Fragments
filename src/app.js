@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
   res.status(200).json({
     status: 'ok',
     author,
-    githubUrl: 'https://github.com/REPLACE_WITH_YOUR_GITHUB_USERNAME/fragments',
+    githubUrl: 'https://github.com/NaveedAhmeds/Fargments',
     version,
   });
 });
@@ -34,8 +34,8 @@ app.use((req, res) => {
   });
 });
 
-// Error-handling Middleware
-app.use((err, req, res, next) => {
+// Error-handling Middleware without the 'next' parameter
+app.use((err, req, res) => {
   const status = err.status || 500;
   const message = err.message || 'unable to process request';
 
