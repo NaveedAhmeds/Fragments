@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/NaveedAhmeds/Fargments/issues"
   },
-  "homepage": "https://github.com/NaveedAhmeds/Fargments#readme"
+  "homepage": "https://github.com/NaveedAhmeds/Fargments#readme",
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
 }
