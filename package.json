@@ -1,0 +1,20 @@
+{
+  "name": "fargments",
+  "version": "1.0.0",
+  "description": "This is a reporsitory on which the lab 1 will be worked on.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaveedAhmeds/Fargments.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NaveedAhmeds/Fargments/issues"
+  },
+  "homepage": "https://github.com/NaveedAhmeds/Fargments#readme"
+}
