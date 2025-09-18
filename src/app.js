@@ -7,26 +7,27 @@ const { author, version } = require('../package.json');
 const logger = require('./logger');
 const pino = require('pino-http')({ logger });
 
+const routes = require('./routes');
+
 const app = express();
+const passport = require('passport');
+const { authenticate, strategy } = require('./auth');
+
+// Initialize Passport and use Cognito JWT strategy
+passport.use(strategy());
+app.use(passport.initialize());
 
 app.use(pino); // Pino HTTP logging middleware
 app.use(helmet()); // Security headers
 app.use(cors()); // Enable CORS
 app.use(compression()); // Gzip compression
 
-// Health check route
-app.get('/', (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache');
+app.use(express.json()); // Parse JSON request bodies
 
-  res.status(200).json({
-    status: 'ok',
-    author: 'Naveed Ahmed Syed',
-    githubUrl: 'https://github.com/NaveedAhmeds/Fargments',
-    version,
-  });
-});
+// Use modular routes
+app.use('/', routes);
 
-// 404 Middleware
+// 404 Middleware for unknown routes
 app.use((req, res) => {
   res.status(404).json({
     status: 'error',
@@ -34,13 +35,13 @@ app.use((req, res) => {
   });
 });
 
-// Error-handling Middleware without the 'next' parameter
-app.use((err, req, res) => {
+// Error-handling Middleware (with 4 parameters to catch all errors)
+app.use((err, req, res, next) => {
   const status = err.status || 500;
   const message = err.message || 'unable to process request';
 
   if (status >= 500) {
-    logger.error({ err }, `Server error`);
+    logger.error({ err }, 'Server error');
   }
 
   res.status(status).json({
