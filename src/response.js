@@ -35,7 +35,7 @@ module.exports.createErrorResponse = function (code, message) {
     status: 'error',
     error: {
       code: code,
-      message: 'not found',
+      message: message,
     },
   };
 };
