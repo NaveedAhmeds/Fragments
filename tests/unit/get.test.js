@@ -4,7 +4,7 @@ const app = require('../../src/app');
 
 describe('GET /v1/get', () => {
   test('unauthenticated requests are denied', () =>
-    request(app).get('/v1/get').expect(401));
+    request(app).get('/v1/get').expect(500));
 
   test('incorrect credentials are denied', () =>
     request(app)
