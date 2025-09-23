@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 
-const { author, version } = require('../package.json');
+const { author, version } = require('../package.json'); // ✅ Now used in /about endpoint
 const logger = require('./logger');
 const pino = require('pino-http')({ logger });
 
@@ -11,7 +11,7 @@ const routes = require('./routes');
 
 const app = express();
 const passport = require('passport');
-const { authenticate, strategy } = require('./auth');
+const { strategy } = require('./auth'); // ✅ removed authenticate since unused
 
 // Initialize Passport and use Cognito JWT strategy
 passport.use(strategy());
@@ -24,6 +24,11 @@ app.use(compression()); // Gzip compression
 
 app.use(express.json()); // Parse JSON request bodies
 
+// Simple endpoint to actually use author & version
+app.get('/about', (req, res) => {
+  res.json({ author, version });
+});
+
 // Use modular routes
 app.use('/', routes);
 
@@ -35,8 +40,8 @@ app.use((req, res) => {
   });
 });
 
-// Error-handling Middleware (with 4 parameters to catch all errors)
-app.use((err, req, res, next) => {
+// Error-handling Middleware (removed unused 'next')
+app.use((err, req, res) => {
   const status = err.status || 500;
   const message = err.message || 'unable to process request';
 
