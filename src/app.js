@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 
-const { author, version } = require('../package.json'); // ✅ Now used in /about endpoint
+const { author, version } = require('../package.json');
 const logger = require('./logger');
 const pino = require('pino-http')({ logger });
 
@@ -11,7 +11,7 @@ const routes = require('./routes');
 
 const app = express();
 const passport = require('passport');
-const { strategy } = require('./auth'); // ✅ removed authenticate since unused
+const { strategy } = require('./auth');
 
 // Initialize Passport and use Cognito JWT strategy
 passport.use(strategy());
@@ -21,10 +21,25 @@ app.use(pino); // Pino HTTP logging middleware
 app.use(helmet()); // Security headers
 app.use(cors()); // Enable CORS
 app.use(compression()); // Gzip compression
-
 app.use(express.json()); // Parse JSON request bodies
 
-// Simple endpoint to actually use author & version
+// Middleware to set Cache-Control header for all routes
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-cache');
+  next();
+});
+
+// Health-check endpoint (for tests)
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    author,
+    version,
+    githubUrl: 'http://localhost:8080', // or replace with actual env var if needed
+  });
+});
+
+// Simple /about endpoint
 app.get('/about', (req, res) => {
   res.json({ author, version });
 });
@@ -40,7 +55,7 @@ app.use((req, res) => {
   });
 });
 
-// Error-handling Middleware (removed unused 'next')
+// Error-handling Middleware
 app.use((err, req, res) => {
   const status = err.status || 500;
   const message = err.message || 'unable to process request';
@@ -52,6 +67,18 @@ app.use((err, req, res) => {
   res.status(status).json({
     status: 'error',
     error: { message, code: status },
+  });
+});
+
+// Add 404 middleware to handle any requests for resources that can't be found can't be found
+app.use((req, res) => {
+  // Pass along an error object to the error-handling middleware
+  res.status(404).json({
+    status: 'error',
+    error: {
+      message: 'not found',
+      code: 404,
+    },
   });
 });
 
