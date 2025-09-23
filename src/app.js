@@ -55,8 +55,8 @@ app.use((req, res) => {
   res.status(404).json(createErrorResponse(404, 'not found'));
 });
 
-// Error-handling Middleware
-app.use((err, req, res, next) => {
+// Error-handling Middleware (safe: remove unused next)
+app.use((err, req, res) => {
   const status = err.status || 500;
   const message = err.message || 'unable to process request';
 
