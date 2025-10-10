@@ -1,9 +1,6 @@
 // src/auth/index.js
 
-// Make sure our env isn't configured for both AWS Cognito and HTTP Basic Auth.
-// We can only do one or the other.  If your .env file contains all 3 of these
-// variables, something is wrong.  It should have AWS_COGNITO_POOL_ID and
-// AWS_COGNITO_CLIENT_ID together OR HTPASSWD_FILE on its own.
+// Check for mutually exclusive configurations
 if (
   process.env.AWS_COGNITO_POOL_ID &&
   process.env.AWS_COGNITO_CLIENT_ID &&
@@ -14,15 +11,20 @@ if (
   );
 }
 
-// Prefer Amazon Cognito (production)
+// Prefer Amazon Cognito (production or development)
 if (process.env.AWS_COGNITO_POOL_ID && process.env.AWS_COGNITO_CLIENT_ID) {
+  // If both Cognito variables are present, use Cognito strategy
   module.exports = require('./cognito');
 }
-// Also allow for an .htpasswd file to be used, but not in production
-else if (process.env.HTPASSWD_FILE && process.NODE_ENV !== 'production') {
+// Allow .htpasswd file for development only
+else if (
+  process.env.HTPASSWD_FILE &&
+  (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production')
+) {
+  // If .htpasswd is present and NOT in production, use basic auth
   module.exports = require('./basic-auth');
 }
-// In all other cases, we need to stop now and fix our config
+// In all other cases, stop and instruct user to fix config
 else {
   throw new Error('missing env vars: no authorization configuration found');
 }
