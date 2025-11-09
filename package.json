@@ -1,6 +1,6 @@
 {
   "name": "fargments",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "This is a reporsitory on which the lab 1 will be worked on.",
   "main": "index.js",
   "scripts": {
