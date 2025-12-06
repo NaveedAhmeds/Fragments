@@ -8,11 +8,15 @@ const logger = require('./logger');
 const pino = require('pino-http')({ logger });
 
 const routes = require('./routes');
+
 const passport = require('passport');
 const { strategy } = require('./auth');
 const { createSuccessResponse, createErrorResponse } = require('./response');
 
 const app = express();
+app.use(express.text({ type: 'text/*' }));
+app.use('/', routes);
+app.use('/v1', require('./routes/api'));
 
 // Initialize Passport and use JWT strategy
 passport.use(strategy());

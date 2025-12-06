@@ -1,16 +1,26 @@
-/**
- * Get a list of fragments for the current user
- */
-const {
-  createSuccessResponse,
-  createErrorResponse,
-} = require('../../response');
+const express = require('express');
+const router = express.Router();
+const { getFragmentsForUser } = require('../../services/fragmentService');
 
-module.exports = async (req, res) => {
+router.get('/fragments', async (req, res) => {
+  const expand = req.query.expand;
   try {
-    const fragments = []; // Replace with actual DB call: await getFragmentsFromDb(req.user);
-    res.status(200).json(createSuccessResponse({ fragments }));
-  } catch {
-    res.status(500).json(createErrorResponse(500, 'Failed to fetch fragments'));
+    let fragments = await getFragmentsForUser(req.user);
+    if (expand === '1') {
+      fragments = fragments.map((frag) => ({
+        id: frag.id,
+        owner: frag.owner,
+        type: frag.type,
+        created: frag.created,
+        data: frag.data,
+      }));
+    } else {
+      fragments = fragments.map((frag) => ({ id: frag.id }));
+    }
+    res.status(200).json({ fragments });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-};
+});
+
+module.exports = router;

@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-// Import individual route handlers
-const getFragments = require('./get');
+const getFragmentsRoute = require('./get');
+const postFragmentsRoute = require('./post');
+const convertRoute = require('./convert');
+const byIdRoute = require('./byId');
 
-// Define GET /v1/get
-router.get('/get', getFragments);
+router.use('/', getFragmentsRoute);
+router.use('/', postFragmentsRoute);
+router.use('/', convertRoute); // must be before byId
+router.use('/', byIdRoute);
 
 module.exports = router;

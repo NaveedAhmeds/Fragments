@@ -28,4 +28,3 @@ jobs:
           context: .
           push: true
           tags: naveed2006/fragments:latest
-

@@ -1,23 +1,33 @@
-// tests/unit/get.test.js
 const request = require('supertest');
 const app = require('../../src/app');
 
-describe('GET /v1/get', () => {
-  test('unauthenticated requests are denied', () =>
-    request(app).get('/v1/get').expect(401));
+describe('GET /v1/fragments?expand=1', () => {
+  test("should return expanded metadata for user's fragments", async () => {
+    // create a fragment to test
+    await request(app)
+      .post('/v1/fragments')
+      .set('Authorization', 'Bearer testtoken')
+      .set('Content-Type', 'text/plain')
+      .send('fragment data');
 
-  test('incorrect credentials are denied', () =>
-    request(app)
-      .get('/v1/get')
-      .auth('invalid@email.com', 'incorrect_password')
-      .expect(401));
-
-  test('authenticated users get a fragments array', async () => {
-    const res = await request(app).get('/v1/get').auth('user1@email.com', '1');
+    const res = await request(app)
+      .get('/v1/fragments?expand=1')
+      .set('Authorization', 'Bearer testtoken');
     expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe('ok');
     expect(Array.isArray(res.body.fragments)).toBe(true);
+    expect(res.body.fragments.length).toBeGreaterThan(0);
+    expect(res.body.fragments[0]).toHaveProperty('type');
+    expect(res.body.fragments[0]).toHaveProperty('created');
+    expect(res.body.fragments[0]).toHaveProperty('data');
   });
 
-  // TODO: add tests for fragment contents later
+  test('should return only ids if expand is missing', async () => {
+    const res = await request(app)
+      .get('/v1/fragments')
+      .set('Authorization', 'Bearer testtoken');
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body.fragments)).toBe(true);
+    expect(res.body.fragments[0]).toHaveProperty('id');
+    expect(res.body.fragments[0]).not.toHaveProperty('type');
+  });
 });

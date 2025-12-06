@@ -1,12 +1,52 @@
-.github/
-.vscode/
-coverage/
-node_modules/
-tests/
-!tests/.htpasswd
+# Ignore dependencies (will be rebuilt inside container)
+node_modules
+
+# Ignore test coverage, logs, and caches
+coverage
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore local env files (use container env vars instead)
 .env
-eslint.config.mjs
-.git/
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Ignore IDE/editor configs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Ignore git files
+.git
 .gitignore
-.prettier*
-jest*
+.gitattributes
+
+# Ignore OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore test files (we don't need them in production)
+tests/**/*.test.js
+tests/**/*.spec.js
+tests/__mocks__
+
+# KEEP tests/.htpasswd (needed for auth)
+!tests/.htpasswd
+
+# Ignore CI/CD and docs
+.github
+*.md
+LICENSE
+
+# Ignore Docker files themselves
+Dockerfile*
+.dockerignore
+docker-compose*.yml
