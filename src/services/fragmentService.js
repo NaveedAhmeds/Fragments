@@ -1,30 +1,64 @@
-let fragments = []; // real store would be DB
+// src/services/fragmentService.js
+const data = require('../model/data');
 
-function createFragment(user, type, data) {
-  const newFragment = {
-    id: String(fragments.length + 1),
-    owner: user || 'testuser',
+// Create a new fragment for a user
+async function createFragment(user, type, buffer) {
+  const ownerId = user; // whatever you store as owner (e.g., req.user)
+  const id = String(Date.now()); // or use your existing ID strategy
+
+  const fragment = {
+    id,
+    ownerId,
+    owner: ownerId,
     type,
-    data,
     created: new Date().toISOString(),
   };
-  fragments.push(newFragment);
 
-  return Promise.resolve(newFragment);
+  // Save metadata (MemoryDB)
+  await data.writeFragment(fragment);
+  // Save data (S3)
+  await data.writeFragmentData(ownerId, id, buffer);
+
+  return fragment;
 }
 
-function getFragmentsForUser(user) {
-  return Promise.resolve(fragments.filter((frag) => frag.owner === user));
+// List fragments for a user
+async function getFragmentsForUser(user, expand = false) {
+  const ownerId = user;
+  return data.listFragments(ownerId, expand);
 }
 
-function getFragmentById(user, id) {
-  return Promise.resolve(
-    fragments.find((frag) => frag.id === id && frag.owner === user)
-  );
+// Get fragment metadata + data for a user/id
+async function getFragmentById(user, id) {
+  const ownerId = user;
+  const fragment = await data.readFragment(ownerId, id);
+  if (!fragment) {
+    return null;
+  }
+  const buffer = await data.readFragmentData(ownerId, id);
+  return {
+    id: fragment.id,
+    owner: fragment.ownerId || fragment.owner,
+    type: fragment.type,
+    created: fragment.created,
+    data: buffer,
+  };
+}
+
+// Delete fragment metadata + data
+async function deleteFragmentById(user, id) {
+  const ownerId = user;
+  const fragment = await data.readFragment(ownerId, id);
+  if (!fragment) {
+    return false;
+  }
+  await data.deleteFragment(ownerId, id);
+  return true;
 }
 
 module.exports = {
   createFragment,
   getFragmentsForUser,
   getFragmentById,
+  deleteFragmentById,
 };

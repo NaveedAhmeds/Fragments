@@ -14,7 +14,9 @@ router.post('/fragments', async (req, res) => {
 
   try {
     const fragment = await createFragment(req.user, contentType, data);
-    res.status(201).location(`/fragments/${fragment.id}`).json({ fragment });
+    // Use absolute URL for Location header
+    const locationUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}/fragments/${fragment.id}`;
+    res.status(201).location(locationUrl).json({ fragment });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
