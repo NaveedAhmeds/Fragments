@@ -53,9 +53,36 @@ jobs:
       - name: Install node dependencies and run Tests
         run: npm install-ci-test
 
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Install node dependencies
+        # Need dev deps so Hurl CLI is available
+        run: npm install
+
+      - name: Build and start containers
+        run: docker compose up -d
+
+      - name: Setup Local AWS Resources
+        run: ./scripts/local-aws-setup.sh
+
+      - name: Run Hurl integration tests
+        run: npm run test:integration
+
   docker-hub:
     name: Build and Push to Docker Hub
-    needs: [lint, dockerfile-lint, unit-tests]
+    # Don't run unless all checks (including integration-tests) pass
+    needs: [lint, dockerfile-lint, unit-tests, integration-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -77,4 +104,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.SHA_TAG }}, ${{ env.DOCKERHUB_REPO }}:main, ${{ env.DOCKERHUB_REPO }}:latest
+          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.SHA_TAG }},${{ env.DOCKERHUB_REPO }}:main,${{ env.DOCKERHUB_REPO }}:latest
