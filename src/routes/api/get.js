@@ -1,25 +1,29 @@
+// src/routes/api/get.js
+
 const express = require('express');
 const router = express.Router();
-const { getFragmentsForUser } = require('../../services/fragmentService');
 
+const logger = require('../../logger');
+const {
+  createSuccessResponse,
+  createErrorResponse,
+} = require('../../response');
+const data = require('../../model/data');
+
+// GET /v1/fragments
+// - ?expand=1 -> full metadata + data
+// - no expand -> ids only
 router.get('/fragments', async (req, res) => {
-  const expand = req.query.expand;
   try {
-    let fragments = await getFragmentsForUser(req.user);
-    if (expand === '1') {
-      fragments = fragments.map((frag) => ({
-        id: frag.id,
-        owner: frag.owner,
-        type: frag.type,
-        created: frag.created,
-        data: frag.data,
-      }));
-    } else {
-      fragments = fragments.map((frag) => ({ id: frag.id }));
-    }
-    res.status(200).json({ fragments });
+    const expand = req.query.expand === '1';
+    logger.debug(`Get all fragments for user ${req.user}, expand=${expand}`);
+
+    const fragments = await data.listFragments(req.user, expand);
+
+    res.status(200).json(createSuccessResponse({ fragments }));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    logger.error(`Failed to get fragments for user ${req.user}: ${err}`);
+    res.status(500).json(createErrorResponse(500, 'Internal Server Error'));
   }
 });
 

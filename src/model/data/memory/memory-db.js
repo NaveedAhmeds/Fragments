@@ -1,36 +1,37 @@
 // src/model/data/memory/memory-db.js
-const store = new Map();
 
-function key(ownerId, id) {
-  return `${ownerId}:${id}`;
-}
+// Factory that creates an isolated key/value store for (ownerId, id) -> value.
+function createStore() {
+  const store = new Map();
 
-function put(ownerId, id, fragment) {
-  store.set(key(ownerId, id), fragment);
-  return fragment;
-}
-
-function get(ownerId, id) {
-  return store.get(key(ownerId, id)) || null;
-}
-
-async function query(ownerId) {
-  const result = [];
-  for (const [k, v] of store.entries()) {
-    if (k.startsWith(`${ownerId}:`)) {
-      result.push(v);
-    }
+  function key(ownerId, id) {
+    return `${ownerId}:${id}`;
   }
-  return result;
+
+  function put(ownerId, id, value) {
+    store.set(key(ownerId, id), value);
+    return value;
+  }
+
+  function get(ownerId, id) {
+    return store.get(key(ownerId, id)) || null;
+  }
+
+  async function query(ownerId) {
+    const result = [];
+    for (const [k, v] of store.entries()) {
+      if (k.startsWith(`${ownerId}:`)) {
+        result.push(v);
+      }
+    }
+    return result;
+  }
+
+  async function del(ownerId, id) {
+    store.delete(key(ownerId, id));
+  }
+
+  return { put, get, query, del };
 }
 
-async function del(ownerId, id) {
-  store.delete(key(ownerId, id));
-}
-
-module.exports = {
-  put,
-  get,
-  query,
-  del,
-};
+module.exports = { createStore };
