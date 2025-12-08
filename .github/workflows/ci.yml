@@ -36,6 +36,7 @@ jobs:
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
+          config: .hadolint.yaml
 
   unit-tests:
     name: Unit Tests
@@ -67,7 +68,6 @@ jobs:
           cache: 'npm'
 
       - name: Install node dependencies
-        # Need dev deps so Hurl CLI is available
         run: npm install
 
       - name: Build and start containers
@@ -81,7 +81,6 @@ jobs:
 
   docker-hub:
     name: Build and Push to Docker Hub
-    # Don't run unless all checks (including integration-tests) pass
     needs: [lint, dockerfile-lint, unit-tests, integration-tests]
     runs-on: ubuntu-latest
     steps:
